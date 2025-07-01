@@ -1,114 +1,126 @@
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(TapTapGame());
+  runApp(const MyApp());
 }
 
-class TapTapGame extends StatelessWidget {
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'TapTap Game',
+      title: 'Tic Tac Toe',
+      theme: ThemeData(primarySwatch: Colors.blue),
+      home: const TicTacToeGame(),
       debugShowCheckedModeBanner: false,
-      home: TapGamePage(),
     );
   }
 }
 
-class TapGamePage extends StatefulWidget {
+class TicTacToeGame extends StatefulWidget {
+  const TicTacToeGame({super.key});
   @override
-  _TapGamePageState createState() => _TapGamePageState();
+  State<TicTacToeGame> createState() => _TicTacToeGameState();
 }
 
-class _TapGamePageState extends State<TapGamePage> {
-  int _score = 0;
-  int _timeLeft = 10;
-  bool _isGameStarted = false;
-  late final Stopwatch _stopwatch;
+class _TicTacToeGameState extends State<TicTacToeGame> {
+  List<String> board = List.filled(9, '');
+  String currentPlayer = 'X';
+  String? winner;
 
-  @override
-  void initState() {
-    super.initState();
-    _stopwatch = Stopwatch();
-  }
-
-  void _startGame() {
-    setState(() {
-      _score = 0;
-      _timeLeft = 10;
-      _isGameStarted = true;
-    });
-    _stopwatch.reset();
-    _stopwatch.start();
-    _startTimer();
-  }
-
-  void _startTimer() {
-    Future.doWhile(() async {
-      await Future.delayed(Duration(seconds: 1));
+  void _handleTap(int index) {
+    if (board[index] == '' && winner == null) {
       setState(() {
-        _timeLeft--;
-      });
-      if (_timeLeft <= 0) {
-        _stopwatch.stop();
-        _isGameStarted = false;
-        return false;
-      }
-      return true;
-    });
-  }
-
-  void _tap() {
-    if (_isGameStarted) {
-      setState(() {
-        _score++;
+        board[index] = currentPlayer;
+        winner = _checkWinner();
+        if (winner == null) {
+          currentPlayer = currentPlayer == 'X' ? 'O' : 'X';
+        }
       });
     }
+  }
+
+  String? _checkWinner() {
+    const winningCombos = [
+      [0, 1, 2], [3, 4, 5], [6, 7, 8], // rows
+      [0, 3, 6], [1, 4, 7], [2, 5, 8], // columns
+      [0, 4, 8], [2, 4, 6], // diagonals
+    ];
+    for (var combo in winningCombos) {
+      final a = combo[0], b = combo[1], c = combo[2];
+      if (board[a] != '' && board[a] == board[b] && board[a] == board[c]) {
+        return board[a]; // X or O
+      }
+    }
+    if (!board.contains('')) {
+      return 'Draw';
+    }
+    return null;
+  }
+
+  void _resetGame() {
+    setState(() {
+      board = List.filled(9, '');
+      currentPlayer = 'X';
+      winner = null;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.indigo,
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              _isGameStarted ? 'Tap!' : 'Tap to Start',
-              style: TextStyle(fontSize: 32, color: Colors.white),
+      appBar: AppBar(title: const Text('Tic Tac Toe')),
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            winner == null
+                ? 'Current Player: $currentPlayer'
+                : winner == 'Draw'
+                ? 'It\'s a Draw!'
+                : 'Winner: $winner',
+            style: const TextStyle(fontSize: 24),
+          ),
+          const SizedBox(height: 20),
+          _buildBoard(),
+          const SizedBox(height: 20),
+          ElevatedButton(
+            onPressed: _resetGame,
+            child: const Text('Reset Game'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBoard() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      height: 300,
+      width: 300,
+      child: GridView.builder(
+        itemCount: 9,
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 3,
+        ),
+        itemBuilder: (context, index) => GestureDetector(
+          onTap: () => _handleTap(index),
+          child: Container(
+            margin: const EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              color: Colors.blue[100],
+              border: Border.all(color: Colors.black),
             ),
-            SizedBox(height: 30),
-            Text(
-              'Score: $_score',
-              style: TextStyle(fontSize: 24, color: Colors.white),
-            ),
-            Text(
-              'Time Left: $_timeLeft s',
-              style: TextStyle(fontSize: 20, color: Colors.white70),
-            ),
-            SizedBox(height: 40),
-            GestureDetector(
-              onTap: _isGameStarted ? _tap : _startGame,
-              child: Container(
-                width: 150,
-                height: 150,
-                decoration: BoxDecoration(
-                  color: Colors.orange,
-                  shape: BoxShape.circle,
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  _isGameStarted ? 'TAP!' : 'START',
-                  style: TextStyle(
-                    fontSize: 24,
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
+            child: Center(
+              child: Text(
+                board[index],
+                style: TextStyle(
+                  fontSize: 48,
+                  color: board[index] == 'X' ? Colors.blue : Colors.red,
                 ),
               ),
             ),
-          ],
+          ),
         ),
       ),
     );
