@@ -69,9 +69,11 @@ class _TicTacToeGameState extends State<TicTacToeGame> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.blue, // 👈 Set the background color here
       appBar: AppBar(title: const Text('Tic Tac Toe')),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
+
         children: [
           Text(
             winner == null
@@ -79,7 +81,7 @@ class _TicTacToeGameState extends State<TicTacToeGame> {
                 : winner == 'Draw'
                 ? 'It\'s a Draw!'
                 : 'Winner: $winner',
-            style: const TextStyle(fontSize: 24),
+            style: const TextStyle(fontSize: 24, color: Colors.white),
           ),
           const SizedBox(height: 20),
           _buildBoard(),
@@ -98,6 +100,7 @@ class _TicTacToeGameState extends State<TicTacToeGame> {
       padding: const EdgeInsets.all(16),
       height: 300,
       width: 300,
+
       child: GridView.builder(
         itemCount: 9,
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -108,15 +111,18 @@ class _TicTacToeGameState extends State<TicTacToeGame> {
           child: Container(
             margin: const EdgeInsets.all(4),
             decoration: BoxDecoration(
-              color: Colors.blue[100],
+              color: const Color.fromARGB(255, 231, 88, 6),
               border: Border.all(color: Colors.black),
+              borderRadius: BorderRadius.circular(8),
             ),
             child: Center(
               child: Text(
                 board[index],
                 style: TextStyle(
                   fontSize: 48,
-                  color: board[index] == 'X' ? Colors.blue : Colors.red,
+                  color: board[index] == 'X'
+                      ? const Color.fromARGB(255, 243, 243, 243)
+                      : const Color.fromARGB(255, 218, 214, 213),
                 ),
               ),
             ),
